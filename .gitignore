@@ -14,8 +14,7 @@ env/
 .vscode/
 .idea/
 
-# 数据库
-data/*.db
+# 数据库（数据文件保留，方便clone即用）
 data/raw/
 data/export.json
 
