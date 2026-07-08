@@ -1,0 +1,34 @@
+# ============================================
+# 校招进度聚合器 - 配置示例
+# ============================================
+# 复制此文件为 config.yaml 并根据需要修改
+
+# 话题配置
+# 格式: 话题名称: UUID
+# UUID 从牛客网话题页面 URL 获取
+# 例如 https://www.nowcoder.com/creation/subject/xxxxxxxx 中的 xxxxxxxx
+topics:
+  2026校招: "a8e19fd30bff42188ed032f4fcbf0415"
+  腾讯: "607c9c2a9baf4167a473bef8336b01c4"
+  字节开奖: "aa208513b8f04422bf8764691080a6fc"
+  校招薪资: "c6948ebc5fd24f6daa8a3d8b1f7a2c96"
+
+  # 更多话题:
+  # 美团: "61d5479676454b868dd85be27fe0a98f"
+  # 拼多多: "d67e0649d79547d4b12d5096c14c210e"
+
+# 爬虫配置
+crawler:
+  min_interval: 2.5      # 最小请求间隔（秒）
+  max_pages: 10           # 每个话题最多抓取页数
+  request_timeout: 20     # 请求超时（秒）
+  max_retries: 3          # 最大重试次数
+  backoff_base: 2         # 退避基数（秒）
+
+# 数据库路径
+database_path: "data/nowcoder.db"
+
+# 增量抓取
+# 设置 since_timestamp（毫秒）只抓取某个时间之后的内容
+# 例如 1778000000000 对应 2026-04-01 左右
+# since_timestamp: 1778000000000

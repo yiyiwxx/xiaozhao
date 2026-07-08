@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ timeline.company }} - 校招进度</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.08);
+            --radius: 12px;
+        }
+        body {
+            background: var(--bg);
+            font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        .header {
+            background: linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #6366f1 100%);
+            padding: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .header h1 { color: #fff; font-size: 22px; font-weight: 700; margin: 0; }
+        .header .sub { color: rgba(255,255,255,0.7); font-size: 13px; }
+        .header a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
+        .header a:hover { color: #fff; }
+        .stat-card {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            height: 100%;
+        }
+        .stat-card .num { font-size: 24px; font-weight: 700; color: var(--primary); }
+        .stat-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+        .section-title {
+            font-size: 15px; font-weight: 600; color: var(--text-primary);
+            margin: 20px 0 10px; display: flex; align-items: center; gap: 8px;
+        }
+        .section-title .count { font-size: 13px; font-weight: 400; color: var(--text-secondary); }
+
+        .stage-tag {
+            font-size: 12px; padding: 4px 12px; border-radius: 6px; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .stage-offer { background: #dcfce7; color: #166534; }
+        .stage-rejected { background: #fee2e2; color: #991b1b; }
+        .stage-declined { background: #fef3c7; color: #92400e; }
+        .stage-interview { background: #dbeafe; color: #1e40af; }
+        .stage-salary { background: #fef9c3; color: #854d0e; }
+        .stage-pool { background: #f3e8ff; color: #6b21a8; }
+        .stage-oc { background: #d1fae5; color: #065f46; }
+        .stage-revived { background: #e0e7ff; color: #3730a3; }
+        .stage-test { background: #fce7f3; color: #9d174d; }
+        .stage-other { background: #f1f5f9; color: #475569; }
+
+        .event-card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .event-card:hover { box-shadow: var(--shadow-hover); }
+        .event-card .date {
+            font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 90px;
+        }
+        .event-card .type-badge {
+            font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 20px;
+        }
+        .conf-high { background: #dcfce7; color: #166534; }
+        .conf-mid { background: #fef9c3; color: #854d0e; }
+        .conf-low { background: #fee2e2; color: #991b1b; }
+        .event-card .evidence {
+            font-size: 13px; color: #475569;
+            background: #f8fafc; padding: 8px 12px; border-radius: 6px;
+            border-left: 3px solid var(--primary-light);
+            margin: 6px 0;
+        }
+        .event-card .meta-link { font-size: 12px; color: var(--text-secondary); }
+        .event-card .meta-link a { color: var(--primary); text-decoration: none; }
+        .event-card .meta-link a:hover { text-decoration: underline; }
+
+        .salary-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .salary-item { background: #f8fafc; border-radius: 8px; padding: 10px 16px; min-width: 100px; text-align: center; }
+        .salary-item .val { font-size: 18px; font-weight: 700; color: var(--primary); }
+        .salary-item .lbl { font-size: 11px; color: var(--text-secondary); }
+
+        .edu-item { display: inline-block; background: #f8fafc; border-radius: 6px; padding: 4px 10px; font-size: 13px; margin: 2px; }
+
+        .footer { text-align: center; padding: 20px; font-size: 12px; color: var(--text-secondary); }
+        .footer a { color: var(--primary); text-decoration: none; }
+
+        .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .filter-tab {
+            font-size: 12px; padding: 4px 12px; border-radius: 20px;
+            border: 1px solid var(--border); background: #fff;
+            cursor: pointer; transition: all 0.2s; color: var(--text-secondary);
+        }
+        .filter-tab:hover { border-color: var(--primary); color: var(--primary); }
+        .filter-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .event-card .date { min-width: auto; }
+            .salary-item { min-width: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <a href="/">← 返回首页</a>
+                <h1 class="mt-1">{{ timeline.company }}</h1>
+                <div class="sub">{{ timeline.event_count }} 个事件 · {{ (timeline.latest_update or '')[:10] }} 更新</div>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="stage-tag stage-offer">Offer {{ timeline.stage_summary.get('offer', 0) }}</span>
+                <span class="stage-tag stage-rejected">被拒 {{ timeline.stage_summary.get('rejected', 0) }}</span>
+                <span class="stage-tag stage-salary">开奖 {{ timeline.stage_summary.get('salary', 0) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin-top:16px;">
+
+        <!-- Stage Summary -->
+        {% if timeline.stage_summary %}
+        <div class="section-title">阶段概况</div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            {% set stage_info = {
+                'offer': ('Offer', 'stage-offer'), 'oc': ('OC', 'stage-oc'),
+                'rejected': ('被拒', 'stage-rejected'), 'declined': ('主动拒', 'stage-declined'),
+                'first_interview': ('一面', 'stage-interview'), 'second_interview': ('二面', 'stage-interview'),
+                'third_interview': ('终面', 'stage-interview'), 'hr_interview': ('HR面', 'stage-interview'),
+                'written_test': ('笔试', 'stage-test'),
+                'salary': ('开奖/薪资', 'stage-salary'),
+                'pool': ('泡池子', 'stage-pool'), 'revived': ('复活', 'stage-revived'),
+                'application': ('投递', 'stage-other'),
+            } %}
+            {% for stage, cnt in timeline.stage_summary.items() %}
+            {% set si = stage_info.get(stage, (stage, 'stage-other')) %}
+            <span class="stage-tag {{ si[1] }}">{{ si[0] }} <strong>{{ cnt }}</strong></span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Salary Summary -->
+        {% if timeline.salary_summary and timeline.salary_summary.sample_count > 0 %}
+        <div class="section-title">💰 薪资概览 <span class="count">{{ timeline.salary_summary.sample_count }} 个样本</span></div>
+        <div class="stat-card mb-3" style="text-align:left;">
+            <div class="salary-row">
+                <div class="salary-item">
+                    <div class="lbl">最低总包</div>
+                    <div class="val">{{ timeline.salary_summary.minimum_total_compensation or '-' }}<small style="font-size:12px;color:var(--text-secondary);">w</small></div>
+                </div>
+                <div class="salary-item">
+                    <div class="lbl">中位总包</div>
+                    <div class="val" style="color:#d97706;">{{ timeline.salary_summary.median_total_compensation or '-' }}<small style="font-size:12px;color:var(--text-secondary);">w</small></div>
+                </div>
+                <div class="salary-item">
+                    <div class="lbl">最高总包</div>
+                    <div class="val">{{ timeline.salary_summary.maximum_total_compensation or '-' }}<small style="font-size:12px;color:var(--text-secondary);">w</small></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Education -->
+        {% if timeline.education_summary %}
+        <div class="section-title">🎓 学历信息</div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            {% if timeline.education_summary.self_reported_tiers %}
+            {% for tier, cnt in timeline.education_summary.self_reported_tiers.items() %}
+            <span class="edu-item">{{ tier }}: {{ cnt }}人</span>
+            {% endfor %}
+            {% endif %}
+            {% if timeline.education_summary.verified_school_count %}
+            <span class="edu-item">认证学校: {{ timeline.education_summary.verified_school_count }}所</span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Event Timeline -->
+        <div class="section-title">事件时间线 <span class="count">{{ timeline.events|length }} 条</span></div>
+
+        <div class="filter-tabs" id="filterTabs">
+            <span class="filter-tab active" data-type="all" onclick="filterByType('all')">全部</span>
+            {% set seen = [] %}
+            {% for ev in timeline.events %}
+                {% if ev.event not in seen %}
+                    {% set _ = seen.append(ev.event) %}
+                {% endif %}
+            {% endfor %}
+            {% for et in seen %}
+            <span class="filter-tab" data-type="{{ et }}" onclick="filterByType('{{ et }}')">
+                {{ {'offer':'Offer','oc':'OC','rejected':'被拒','declined':'主动拒',
+                   'first_interview':'一面','second_interview':'二面',
+                   'third_interview':'终面','hr_interview':'HR面','written_test':'笔试',
+                   'salary':'开奖','pool':'池子','revived':'复活','application':'投递'
+                }.get(et, et) }}
+            </span>
+            {% endfor %}
+        </div>
+
+        {% if timeline.events %}
+        {% for ev in timeline.events %}
+        <div class="event-card" data-type="{{ ev.event }}">
+            <div class="d-flex align-items-start gap-3 flex-wrap">
+                <div class="date">{{ ev.date[:10] if ev.date else '日期未知' }}</div>
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="type-badge" style="background:#eef2ff;color:#4f46e5;">
+                            {{ {'offer':'Offer','oc':'OC','rejected':'被拒','declined':'主动拒',
+                               'first_interview':'一面','second_interview':'二面',
+                               'third_interview':'终面','hr_interview':'HR面','written_test':'笔试',
+                               'salary':'开奖','pool':'池子','revived':'复活','application':'投递'
+                            }.get(ev.event, ev.event) }}
+                        </span>
+                        {% if ev.role %}
+                        <span class="type-badge" style="background:#f1f5f9;color:#475569;">{{ ev.role_category }} | {{ ev.role }}</span>
+                        {% endif %}
+                        <span class="type-badge {% if ev.confidence >= 0.75 %}conf-high{% elif ev.confidence >= 0.5 %}conf-mid{% else %}conf-low{% endif %}">
+                            {{ (ev.confidence * 100)|int }}%
+                        </span>
+                        {% if ev.get('event_date_source') == 'text' %}
+                        <span class="type-badge" style="background:#e0e7ff;color:#3730a3;font-size:10px;">正文日期</span>
+                        {% endif %}
+                    </div>
+                    <div class="evidence">{{ ev.evidence }}</div>
+                    <div class="meta-link d-flex gap-3 flex-wrap">
+                        {% if ev.location %}<span>📍 {{ ev.location }}</span>{% endif %}
+                        {% if ev.salary %}<span>💰 {{ ev.salary }}</span>{% endif %}
+                        {% if ev.detail_url %}<a href="{{ ev.detail_url }}" target="_blank">🔗 查看原文 →</a>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state text-center text-muted py-4">
+            <p>暂无事件数据</p>
+        </div>
+        {% endif %}
+
+        <div class="footer">
+            <a href="/">← 返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        function filterByType(type) {
+            document.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelector('.filter-tab[data-type="' + type + '"]').classList.add('active');
+            document.querySelectorAll('.event-card').forEach(function(card) {
+                card.style.display = (type === 'all' || card.getAttribute('data-type') === type) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
